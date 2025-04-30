@@ -1,4 +1,4 @@
-# Folder Structure
+# Unfinnished Project and Docs are not correct but working, only i know how to work. non beginners can read and understand whats happening.
 The workspace contains two folders by default, where:
 - `src`: the folder to maintain sources
 - `lib`: the folder to maintain dependencies
