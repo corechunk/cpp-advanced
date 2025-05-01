@@ -1,14 +1,20 @@
 version:17
-compilePath:binW
-compilePathLinux:binL
-exactPaths:enable
-createObjects:enable
+compilePathWindows:binW
+compilePathLinux:..
+exactPaths:enabl
+createObjects:enabl
+
 optionReading:disable
 echoOptions:disable
+
 echoCppFiles:disable
+echoObjectFiles:disable
+
 echoIncludePaths:disable
 echoRelativePaths:disable
+
 echoCompileCommands:enable
+
 scriptDebug:disable
 echoExecutionArguments:disable
 

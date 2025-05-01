@@ -1,46 +1,101 @@
-
-
 @echo off
 setlocal EnableDelayedExpansion
 
 :: Set default values
 set "version=17"
-set "compilePath=."
+set "compilePathWindows=."
 set "exactPaths=disable"
 set "createObjects=disable"
+set "optionReading=disable"
+set "echoOptions=disable"
+set "echoCppFiles=disable"
+set "echoIncludePaths=disable"
+set "echoRelativePaths=disable"
+set "echoCompileCommands=enable"
+set "scriptDebug=enable"
+set "echoExecutionArguments=enable"
+set "echoObjectFiles=disable"
 
 :: Check if srp/build.txt exists
 if exist "srp\build.txt" (
     :: Read and parse srp/build.txt
     for /f "tokens=1,* delims=:" %%a in (srp\build.txt) do (
-        if "%%a"=="version" set "version=%%b"
-        if "%%a"=="path" set "compilePath=%%b"
-        if "%%a"=="exactPaths" set "exactPaths=%%b"
-        if "%%a"=="createObjects" set "createObjects=%%b"
+        :: Trim leading/trailing whitespace from value
+        set "key=%%a"
+        set "value=%%b"
+        for /f "tokens=*" %%v in ("!value!") do set "value=%%v"
+        if "!optionReading!"=="enable" (
+            echo Read: key='!key!', value='!value!'
+        )
+        if "!key!"=="version" set "version=!value!"
+        if "!key!"=="compilePathWindows" set "compilePathWindows=!value!"
+        if "!key!"=="exactPaths" set "exactPaths=!value!"
+        if "!key!"=="createObjects" set "createObjects=!value!"
+        if "!key!"=="optionReading" set "optionReading=!value!"
+        if "!key!"=="echoOptions" set "echoOptions=!value!"
+        if "!key!"=="echoCppFiles" set "echoCppFiles=!value!"
+        if "!key!"=="echoIncludePaths" set "echoIncludePaths=!value!"
+        if "!key!"=="echoRelativePaths" set "echoRelativePaths=!value!"
+        if "!key!"=="echoCompileCommands" set "echoCompileCommands=!value!"
+        if "!key!"=="scriptDebug" set "scriptDebug=!value!"
+        if "!key!"=="echoExecutionArguments" set "echoExecutionArguments=!value!"
+        if "!key!"=="echoObjectFiles" set "echoObjectFiles=!value!"
     )
 )
 
-:: Handle exactPaths and createObjects: only enable if exactly "enable", otherwise disable
-if "%exactPaths%"=="enable" (
-    set "exactPaths=enable"
-) else (
-    set "exactPaths=disable"
+:: Validate and set defaults only if not explicitly enable/disable
+for %%v in (exactPaths createObjects optionReading echoOptions echoCppFiles echoIncludePaths echoRelativePaths echoCompileCommands scriptDebug echoExecutionArguments echoObjectFiles) do (
+    if not "!%%v!"=="enable" if not "!%%v!"=="disable" (
+        if "%%v"=="echoCompileCommands" (
+            set "%%v=enable"
+        ) else if "%%v"=="scriptDebug" (
+            set "%%v=enable"
+        ) else if "%%v"=="echoExecutionArguments" (
+            set "%%v=enable"
+        ) else (
+            set "%%v=disable"
+        )
+    )
 )
-if "%createObjects%"=="enable" (
-    set "createObjects=enable"
-) else (
-    set "createObjects=disable"
+
+:: Map compilePathWindows to compilePath
+set "compilePath=%compilePathWindows%"
+
+:: Debug output for variables
+if "!echoOptions!"=="enable" (
+    echo version: !version!
+    echo compilePath: !compilePath!
+    echo exactPaths: !exactPaths!
+    echo createObjects: !createObjects!
+    echo .
+    echo optionReading: !optionReading!
+    echo echoOptions: !echoOptions!
+    echo .
+    echo echoCppFiles: !echoCppFiles!
+    echo echoObjectFiles: !echoObjectFiles!
+    echo .
+    echo echoIncludePaths: !echoIncludePaths!
+    echo echoRelativePaths: !echoRelativePaths!
+    echo .
+    echo echoCompileCommands: !echoCompileCommands!
+    echo .
+    echo scriptDebug: !scriptDebug!
+    echo echoExecutionArguments: !echoExecutionArguments!
+    echo .
+    echo .
 )
 
 :: Step 0: Clear all .o and .exe files in compilePath
-if exist "%compilePath%" (
-    del /q "%compilePath%\*.o" "%compilePath%\*.exe" 2>nul
+if exist "!compilePath!" (
+    del /q "!compilePath!\*.o" "!compilePath!\*.exe" 2>nul
 )
 
 :: Step 1: Create compilePath if it doesn't exist
-if not exist "%compilePath%" (
-    mkdir "%compilePath%" || (
-        echo Error: Failed to create directory %compilePath%
+if not exist "!compilePath!" (
+    mkdir "!compilePath!" || (
+        if "!scriptDebug!"=="enable" (
+            echo Error: Failed to create directory !compilePath!
+        )
         goto :eof
     )
 )
@@ -58,14 +113,18 @@ for /r lib %%f in (*.cpp) do (
     set "cpp_files=!cpp_files! !file_path!"
 )
 :: Echo cpp_files
-echo cpp_files: !cpp_files!
+if "!echoCppFiles!"=="enable" (
+    echo cpp_files: !cpp_files!
+)
 
 :: Check if any .cpp files were found
 if not "!cpp_files!"=="" (
     :: Set include flags to essential directories only
     set "include_flags=-I. -Isrc -Ilib"
     :: Echo include_flags
-    echo include_flags: !include_flags!
+    if "!echoIncludePaths!"=="enable" (
+        echo include_flags: !include_flags!
+    )
 
     :: Step 3: Compile based on createObjects
     if "!createObjects!"=="enable" (
@@ -78,69 +137,115 @@ if not "!cpp_files!"=="" (
             set "rel_path=!rel_path:%CD%\=!"
             if "!rel_path:~-1!"=="\" set "rel_path=!rel_path:~0,-1!"
             :: Echo rel_path
-            echo rel_path for %%f: !rel_path!
+            if "!echoRelativePaths!"=="enable" (
+                echo rel_path for %%f: !rel_path!
+            )
             if "!exactPaths!"=="enable" (
-                if not exist "%compilePath%\!rel_path!" (
-                    mkdir "%compilePath%\!rel_path!" || (
-                        echo Error: Failed to create directory %compilePath%\!rel_path!
+                if not exist "!compilePath!\!rel_path!" (
+                    mkdir "!compilePath!\!rel_path!" || (
+                        if "!scriptDebug!"=="enable" (
+                            echo Error: Failed to create directory !compilePath!\!rel_path!
+                        )
                         goto :eof
                     )
                 )
-                echo clang++ -std=c++!version! -c "%%f" !include_flags! -o "%compilePath%\!rel_path!\%%~nf.o"
-                clang++ -std=c++!version! -c "%%f" !include_flags! -o "%compilePath%\!rel_path!\%%~nf.o"
-            ) else (
-                echo clang++ -std=c++!version! -c "%%f" !include_flags! -o "%compilePath%\%%~nf.o"
-                clang++ -std=c++!version! -c "%%f" !include_flags! -o "%compilePath%\%%~nf.o"
-            )
-            if !errorlevel!==0 (
-                if "!exactPaths!"=="enable" (
-                    set "obj_files=!obj_files! %compilePath%\!rel_path!\%%~nf.o"
+                if "!echoCompileCommands!"=="enable" (
+                    echo clang++ -std=c++!version! -c "%%f" !include_flags! -o "!compilePath!\!rel_path!\%%~nf.o"
+                )
+                clang++ -std=c++!version! -c "%%f" !include_flags! -o "!compilePath!\!rel_path!\%%~nf.o"
+                :: Always collect obj_files if compilation succeeds
+                if !errorlevel!==0 (
+                    if "!exactPaths!"=="enable" (
+                        set "obj_files=!obj_files! !compilePath!\!rel_path!\%%~nf.o"
+                    ) else (
+                        set "obj_files=!obj_files! !compilePath!\%%~nf.o"
+                    )
+                ) else if "!scriptDebug!"=="enable" (
+                    echo Compilation failed for %%f
+                    goto :eof
                 ) else (
-                    set "obj_files=!obj_files! %compilePath%\%%~nf.o"
+                    echo Warning: Compilation failed silently for %%f ^(scriptDebug=disable^)
                 )
             ) else (
-                echo Compilation failed for %%f
-                goto :eof
+                if "!echoCompileCommands!"=="enable" (
+                    echo clang++ -std=c++!version! -c "%%f" !include_flags! -o "!compilePath!\%%~nf.o"
+                )
+                clang++ -std=c++!version! -c "%%f" !include_flags! -o "!compilePath!\%%~nf.o"
+                :: Always collect obj_files if compilation succeeds
+                if !errorlevel!==0 (
+                    if "!exactPaths!"=="enable" (
+                        set "obj_files=!obj_files! !compilePath!\!rel_path!\%%~nf.o"
+                    ) else (
+                        set "obj_files=!obj_files! !compilePath!\%%~nf.o"
+                    )
+                ) else if "!scriptDebug!"=="enable" (
+                    echo Compilation failed for %%f
+                    goto :eof
+                ) else (
+                    echo Warning: Compilation failed silently for %%f ^(scriptDebug=disable^)
+                )
             )
+        )
+        :: Echo obj_files
+        if "!echoObjectFiles!"=="enable" (
+            echo obj_files: !obj_files!
         )
         :: Link .o files to app.exe
         if not "!obj_files!"=="" (
-            echo clang++ !obj_files! -o "%compilePath%\app.exe"
-            clang++ !obj_files! -o "%compilePath%\app.exe"
-            if !errorlevel!==0 (
-                echo Link successful.
-            ) else (
-                echo Link failed.
-                goto :eof
+            if "!echoCompileCommands!"=="enable" (
+                echo clang++ !obj_files! -o "!compilePath!\app.exe"
+            )
+            clang++ !obj_files! -o "!compilePath!\app.exe"
+            if "!scriptDebug!"=="enable" (
+                if !errorlevel!==0 (
+                    echo Link successful.
+                ) else (
+                    echo Link failed.
+                    goto :eof
+                )
             )
         ) else (
-            echo No object files generated.
-            goto :eof
+            if "!scriptDebug!"=="enable" (
+                echo No object files generated.
+                goto :eof
+            )
         )
     ) else (
         :: Compile directly to app.exe
-        echo clang++ -std=c++!version! !cpp_files! !include_flags! -o "%compilePath%\app.exe"
-        clang++ -std=c++!version! !cpp_files! !include_flags! -o "%compilePath%\app.exe"
-        if !errorlevel!==0 (
-            echo Compilation successful.
-        ) else (
-            echo Compilation failed.
-            goto :eof
+        if "!echoCompileCommands!"=="enable" (
+            echo clang++ -std=c++!version! !cpp_files! !include_flags! -o "!compilePath!\app.exe"
+        )
+        clang++ -std=c++!version! !cpp_files! !include_flags! -o "!compilePath!\app.exe"
+        if "!scriptDebug!"=="enable" (
+            if !errorlevel!==0 (
+                echo Compilation successful.
+            ) else (
+                echo Compilation failed.
+                goto :eof
+            )
         )
     )
 
     :: Step 4: Run app.exe with all arguments (%*)
-    if exist "%compilePath%\app.exe" (
-        echo Running %compilePath%\app.exe with arguments: "%*"
-        "%compilePath%\app.exe" %*
-        if !errorlevel! neq 0 (
-            echo Error: app.exe failed with exit code !errorlevel!
+    if exist "!compilePath!\app.exe" (
+        if "!echoExecutionArguments!"=="enable" (
+            echo Running !compilePath!\app.exe with arguments: "%*"
+        )
+        "!compilePath!\app.exe" %*
+        if "!scriptDebug!"=="enable" (
+            if !errorlevel! neq 0 (
+                echo Error: app.exe failed with exit code !errorlevel!
+            )
         )
     ) else (
-        echo Error: %compilePath%\app.exe not found.
+        if "!scriptDebug!"=="enable" (
+            echo Error: !compilePath!\app.exe not found.
+        )
     )
 ) else (
-    echo No .cpp files found in src or lib directories.
+    if "!scriptDebug!"=="enable" (
+        echo No .cpp files found in src or lib directories.
+    )
 )
 
 endlocal
