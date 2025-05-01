@@ -1,8 +1,8 @@
 version:17
 compilePathWindows:binW
-compilePathLinux:..
-exactPaths:enabl
-createObjects:enabl
+compilePathLinux:binL
+exactPaths:enable
+createObjects:enable
 
 optionReading:disable
 echoOptions:disable
