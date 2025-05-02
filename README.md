@@ -185,8 +185,13 @@ The `srp/build.txt` file allows extensive customization with the following setti
 cmd
 
 ```cmd
+## By the way, arg/arguments are optional
 app.exe [arg1 arg2 ...]  # Windows
 ./app [arg1 arg2 ...]    # Linux/macOS
+
+# Instead you could pass arguments to the scripts as scripts handle them internally:
+build.bat [arg1 arg2 ...]  # Windows
+build.sh [arg1 arg2 ...]  # Linux/MacOS
 ```
 * The output depends on the C++ codebase in src and lib.
 ### 2. Using with Your Own Code:
@@ -194,7 +199,7 @@ app.exe [arg1 arg2 ...]  # Windows
 * Update srp/build.txt for custom settings (e.g., include_paths, libraries).
 * Run build.bat or build.sh to compile.
 ### 3. Passing Arguments:
-* Run the executable directly to pass arguments, as scripts do not handle them internally.
+* You can run the build.bat/build.sh directly to pass arguments, as scripts handle them internally.
 
 ## Extending the Project
 To adapt the build system for a different C++ codebase:
