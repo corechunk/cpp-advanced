@@ -4,8 +4,14 @@ compilePathLinux:binL
 exactPaths:enable
 createObjects:enable
 
+include_paths:
+library_paths:
+libraries:
+target_triple:
+extra_flags:
+
 optionReading:disable
-echoOptions:disable
+echoOptions:enable
 
 echoCppFiles:disable
 echoObjectFiles:disable
