@@ -69,16 +69,12 @@ Clone the repository to your local machine:
    ### 2. Run the Build Script:
    * Open a Command Prompt or PowerShell in the project directory.
    * Execute:
-
 ```cmd
 build.bat
 ```
-
-    * The script compiles .cpp files from src and lib into app.exe in the specified compile path (default: binW)
-    
+   * The script compiles .cpp files from src and lib into app.exe in the specified compile path (default: binW)
    ### 3. Run the Program:
-   
-    * Navigate to the compile path (e.g., binW) and run:
+   * Navigate to the compile path (e.g., binW) and run:
     
 ```cmd
 app.exe [arg1 arg2 ...]
