@@ -47,12 +47,12 @@ To use this build system, you need:
 
 ## Setting Up the Environment
 
-## Clang setup
-* For Windows: [visit this page](srp/PAGE.md)
-* For Linux (Ubuntu): [visit this page](srp/PAGE2.md)
-## Mingw Setup
-* For Windows: [coming soon](srp/PAGE3.md)
-* For Linux (Ubuntu): [coming soon](srp/PAGE4.md)
+* ## Clang setup
+  * For Windows: [visit this page](srp/PAGE.md)
+  * For Linux (Ubuntu): [visit this page](srp/PAGE2.md)
+* ## Mingw Setup
+  * For Windows: [coming soon](srp/PAGE3.md)
+  * For Linux (Ubuntu): [coming soon](srp/PAGE4.md)
 
 ## Getting Started
 
@@ -62,32 +62,35 @@ Clone the repository to your local machine:
 >>git clone https://github.com/Miraj13123/cpp-advanced.git
 >>cd cpp-advanced
 >>```
-## Windows
-### 1. Configure Build Settings (Optional):
-* Edit srp/build.txt to customize settings like version, compilePathWindows, or extra_flags.
+* ## Windows
+   ### 1. Configure Build Settings (Optional):
+   * Edit srp/build.txt to customize settings like version, compilePathWindows, or extra_flags.
 
-### 2. Run the Build Script:
-* Open a Command Prompt or PowerShell in the project directory.
-* Execute:
+   ### 2. Run the Build Script:
+   * Open a Command Prompt or PowerShell in the project directory.
+   * Execute:
 
 >>```cmd
 >>build.bat
 >>```
 
-* The script compiles .cpp files from src and lib into app.exe in the specified compile path (default: binW).
-### 3. Run the Program:
-* Navigate to the compile path (e.g., binW) and run:
+    * The script compiles .cpp files from src and lib into app.exe in the specified compile path (default: binW)
+    
+   ### 3. Run the Program:
+   
+    * Navigate to the compile path (e.g., binW) and run:
+    
 >>```cmd
 >>app.exe [arg1 arg2 ...]
 >>```
-## Linux/macOS
+* ## Linux/macOS
 
-### 1. Configure Build Settings (Optional):
+   ### 1. Configure Build Settings (Optional):
 
-* Edit srp/build.txt to customize settings like version, compilePathLinux, or extra_flags.
+   * Edit srp/build.txt to customize settings like version, compilePathLinux, or extra_flags.
 
-### 2. Run the Build Script:
-* Open a terminal in the project directory.
+   ### 2. Run the Build Script:
+   * Open a terminal in the project directory.
 
 * **Make the script executable:**
 >>```bash
