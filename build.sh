@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 # Set default values
@@ -14,17 +15,25 @@ echoCompileCommands="enable"
 scriptDebug="enable"
 echoExecutionArguments="enable"
 echoObjectFiles="disable"
+include_paths=""
+library_paths=""
+libraries=""
+target_triple=""
+extra_flags=""
+halt="disable"
+route=""
 
 # Check if srp/build.txt exists
 if [[ -f "srp/build.txt" ]]; then
-    # Read and parse srp/build.txt, handling missing trailing newline
-    while IFS= read -r line || [[ -n "$line" ]]; do
+    # Read and parse srp/build.txt, preserving spaces in values
+    while IFS=':' read -r key value || [[ -n "$key" ]]; do
         # Skip empty lines or lines without a colon
-        [[ -z "$line" || "$line" != *":"* ]] && continue
-        key=$(echo "$line" | cut -d':' -f1 | tr -d '[:space:]\r')
-        value=$(echo "$line" | cut -d':' -f2- | tr -d '[:space:]\r')
+        [[ -z "$key" ]] && continue
+        # Trim whitespace and carriage returns from key, preserve value as-is
+        key=$(echo "$key" | tr -d '[:space:]\r')
+        value=$(echo "$value" | tr -d '\r')
         if [[ "$optionReading" == "enable" ]]; then
-            echo "Read: key='$key', value='$value'"  # Debug output
+            echo "Read: key='$key', value='$value'"
         fi
         case "$key" in
             version) version="$value" ;;
@@ -40,8 +49,13 @@ if [[ -f "srp/build.txt" ]]; then
             scriptDebug) scriptDebug="$value" ;;
             echoExecutionArguments) echoExecutionArguments="$value" ;;
             echoObjectFiles) echoObjectFiles="$value" ;;
+            include_paths) include_paths="$value" ;;
+            library_paths) library_paths="$value" ;;
+            libraries) libraries="$value" ;;
+            target_triple) target_triple="$value" ;;
+            extra_flags) extra_flags="$value" ;;
         esac
-    done < <(cat "srp/build.txt" | tr -d '\r')
+    done < <(cat "srp/build.txt")
 fi
 
 # Validate and set defaults only if not explicitly enable/disable
@@ -54,41 +68,70 @@ for var in exactPaths createObjects optionReading echoOptions echoCppFiles echoI
     fi
 done
 
+# Set target flag based on target_triple
+target=""
+[[ -n "$target_triple" ]] && target="-target $target_triple"
+
+# Set halt and route based on extra_flags
+if [[ "$extra_flags" =~ -E|--emit-llvm ]]; then
+    halt="enable"
+    route="-E"
+elif [[ "$extra_flags" =~ -S ]]; then
+    halt="enable"
+    route="-S"
+fi
+
+# Warn if createObjects=disable and halt=enable
+if [[ "$createObjects" == "disable" && "$halt" == "enable" ]]; then
+    echo "ERROR: -E or -S requires createObjects=enable in build.txt."
+    exit 1
+fi
+
 # Debug output for variables
 if [[ "$echoOptions" == "enable" ]]; then
     echo "version: $version"
     echo "compilePath: $compilePath"
     echo "exactPaths: $exactPaths"
     echo "createObjects: $createObjects"
-    echo .
+    echo "."
+    echo "."
+    echo "include_paths: $include_paths"
+    echo "library_paths: $library_paths"
+    echo "libraries: $libraries"
+    echo "target_triple: $target_triple"
+    echo "extra_flags: $extra_flags"
+    echo "."
+    echo "."
+    echo "these two are variable reading from the script"
+    echo "halt: $halt"
+    echo "route: $route"
+    echo "."
     echo "optionReading: $optionReading"
     echo "echoOptions: $echoOptions"
-    echo .
+    echo "."
     echo "echoCppFiles: $echoCppFiles"
     echo "echoObjectFiles: $echoObjectFiles"
-    echo .
+    echo "."
     echo "echoIncludePaths: $echoIncludePaths"
     echo "echoRelativePaths: $echoRelativePaths"
-    echo .
+    echo "."
     echo "echoCompileCommands: $echoCompileCommands"
-    echo .
+    echo "."
     echo "scriptDebug: $scriptDebug"
     echo "echoExecutionArguments: $echoExecutionArguments"
-    echo .
-    echo .
+    echo "."
+    echo "."
 fi
 
-# Step 0: Clear all .o and .exe files in compilePath
+# Step 0: Clear all .o, .exe, and .s files in compilePath
 if [[ -d "$compilePath" ]]; then
-    rm -f "$compilePath"/*.o "$compilePath"/*.exe 2>/dev/null
+    rm -f "$compilePath"/*.o "$compilePath"/*.exe "$compilePath"/*.s 2>/dev/null
 fi
 
 # Step 1: Create compilePath if it doesn't exist
 if [[ ! -d "$compilePath" ]]; then
     mkdir -p "$compilePath" || {
-        if [[ "$scriptDebug" == "enable" ]]; then
-            echo "Error: Failed to create directory $compilePath"
-        fi
+        [[ "$scriptDebug" == "enable" ]] && echo "Error: Failed to create directory $compilePath"
         exit 1
     }
 fi
@@ -98,7 +141,7 @@ cpp_files=()
 while IFS= read -r file; do
     file_path="${file#$(pwd)/}"
     cpp_files+=("$file_path")
-done < <(find src lib -type f -name "*.cpp")
+done < <(find src lib -type f -name "*.cpp" 2>/dev/null)
 # Echo cpp_files
 if [[ "$echoCppFiles" == "enable" ]]; then
     echo "cpp_files: ${cpp_files[*]}"
@@ -106,8 +149,8 @@ fi
 
 # Check if any .cpp files were found
 if [[ ${#cpp_files[@]} -gt 0 ]]; then
-    # Set include flags to essential directories only
-    include_flags="-I. -Isrc -Ilib"
+    # Set include flags with user-specified paths
+    include_flags="-I. -Isrc -Ilib $include_paths"
     # Echo include_flags
     if [[ "$echoIncludePaths" == "enable" ]]; then
         echo "include_flags: $include_flags"
@@ -116,7 +159,7 @@ if [[ ${#cpp_files[@]} -gt 0 ]]; then
     # Step 3: Compile based on createObjects
     if [[ "$createObjects" == "enable" ]]; then
         obj_files=()
-        # Compile each .cpp to .o
+        # Compile each .cpp to .o, .resolved.cpp, or .s
         for file in "${cpp_files[@]}"; do
             # Get relative directory path (e.g., src, lib)
             rel_path=$(dirname "$file")
@@ -126,37 +169,47 @@ if [[ ${#cpp_files[@]} -gt 0 ]]; then
             fi
             if [[ "$exactPaths" == "enable" ]]; then
                 mkdir -p "$compilePath/$rel_path" || {
-                    if [[ "$scriptDebug" == "enable" ]]; then
-                        echo "Error: Failed to create directory $compilePath/$rel_path"
-                    fi
+                    [[ "$scriptDebug" == "enable" ]] && echo "Error: Failed to create directory $compilePath/$rel_path"
                     exit 1
                 }
-                if [[ "$echoCompileCommands" == "enable" ]]; then
-                    echo "clang++ -std=c++$version -c \"$file\" $include_flags -o \"$compilePath/$rel_path/$(basename "${file%.*}").o\""
-                fi
-                clang++ -std=c++"$version" -c "$file" $include_flags -o "$compilePath/$rel_path/$(basename "${file%.*}").o"
-                # Always collect obj_files if compilation succeeds
-                if [[ $? -eq 0 ]]; then
-                    obj_files+=("$compilePath/$rel_path/$(basename "${file%.*}").o")
-                elif [[ "$scriptDebug" == "enable" ]]; then
-                    echo "Compilation failed for $file"
-                    exit 1
+                # Three-way branch based on route
+                if [[ "$route" == "-E" ]]; then
+                    [[ "$echoCompileCommands" == "enable" ]] && echo "clang++ $target -std=c++$version $extra_flags -E \"$file\" $include_flags -o \"$compilePath/$rel_path/$(basename "${file%.*}").resolved.cpp\""
+                    clang++ $target -std=c++"$version" $extra_flags -E "$file" $include_flags -o "$compilePath/$rel_path/$(basename "${file%.*}").resolved.cpp"
+                elif [[ "$route" == "-S" ]]; then
+                    [[ "$echoCompileCommands" == "enable" ]] && echo "clang++ $target -std=c++$version $extra_flags -S \"$file\" $include_flags -o \"$compilePath/$rel_path/$(basename "${file%.*}").s\""
+                    clang++ $target -std=c++"$version" $extra_flags -S "$file" $include_flags -o "$compilePath/$rel_path/$(basename "${file%.*}").s"
                 else
-                    echo "Warning: Compilation failed silently for $file (scriptDebug=disable)"
+                    [[ "$echoCompileCommands" == "enable" ]] && echo "clang++ $target -std=c++$version $extra_flags -c \"$file\" $include_flags -o \"$compilePath/$rel_path/$(basename "${file%.*}").o\""
+                    clang++ $target -std=c++"$version" $extra_flags -c "$file" $include_flags -o "$compilePath/$rel_path/$(basename "${file%.*}").o"
+                    if [[ $? -eq 0 ]]; then
+                        obj_files+=("$compilePath/$rel_path/$(basename "${file%.*}").o")
+                    elif [[ "$scriptDebug" == "enable" ]]; then
+                        echo "Compilation failed for $file"
+                        exit 1
+                    else
+                        echo "Warning: Compilation failed silently for $file (scriptDebug=disable)"
+                    fi
                 fi
             else
-                if [[ "$echoCompileCommands" == "enable" ]]; then
-                    echo "clang++ -std=c++$version -c \"$file\" $include_flags -o \"$compilePath/$(basename "${file%.*}").o\""
-                fi
-                clang++ -std=c++"$version" -c "$file" $include_flags -o "$compilePath/$(basename "${file%.*}").o"
-                # Always collect obj_files if compilation succeeds
-                if [[ $? -eq 0 ]]; then
-                    obj_files+=("$compilePath/$(basename "${file%.*}").o")
-                elif [[ "$scriptDebug" == "enable" ]]; then
-                    echo "Compilation failed for $file"
-                    exit 1
+                # Three-way branch based on route
+                if [[ "$route" == "-E" ]]; then
+                    [[ "$echoCompileCommands" == "enable" ]] && echo "clang++ $target -std=c++$version $extra_flags -E \"$file\" $include_flags -o \"$compilePath/$(basename "${file%.*}").resolved.cpp\""
+                    clang++ $target -std=c++"$version" $extra_flags -E "$file" $include_flags -o "$compilePath/$(basename "${file%.*}").resolved.cpp"
+                elif [[ "$route" == "-S" ]]; then
+                    [[ "$echoCompileCommands" == "enable" ]] && echo "clang++ $target -std=c++$version $extra_flags -S \"$file\" $include_flags -o \"$compilePath/$(basename "${file%.*}").s\""
+                    clang++ $target -std=c++"$version" $extra_flags -S "$file" $include_flags -o "$compilePath/$(basename "${file%.*}").s"
                 else
-                    echo "Warning: Compilation failed silently for $file (scriptDebug=disable)"
+                    [[ "$echoCompileCommands" == "enable" ]] && echo "clang++ $target -std=c++$version $extra_flags -c \"$file\" $include_flags -o \"$compilePath/$(basename "${file%.*}").o\""
+                    clang++ $target -std=c++"$version" $extra_flags -c "$file" $include_flags -o "$compilePath/$(basename "${file%.*}").o"
+                    if [[ $? -eq 0 ]]; then
+                        obj_files+=("$compilePath/$(basename "${file%.*}").o")
+                    elif [[ "$scriptDebug" == "enable" ]]; then
+                        echo "Compilation failed for $file"
+                        exit 1
+                    else
+                        echo "Warning: Compilation failed silently for $file (scriptDebug=disable)"
+                    fi
                 fi
             fi
         done
@@ -164,39 +217,33 @@ if [[ ${#cpp_files[@]} -gt 0 ]]; then
         if [[ "$echoObjectFiles" == "enable" ]]; then
             echo "obj_files: ${obj_files[*]}"
         fi
-        # Link .o files to app.exe
-        if [[ ${#obj_files[@]} -gt 0 ]]; then
-            if [[ "$echoCompileCommands" == "enable" ]]; then
-                echo "clang++ ${obj_files[*]} -o \"$compilePath/app.exe\""
-            fi
-            clang++ "${obj_files[@]}" -o "$compilePath/app.exe"
-            if [[ "$scriptDebug" == "enable" ]]; then
-                if [[ $? -eq 0 ]]; then
-                    echo "Link successful."
-                else
-                    echo "Link failed."
-                    exit 1
+        # Link .o files to app.exe if halt=disable
+        if [[ "$halt" == "disable" ]]; then
+            if [[ ${#obj_files[@]} -gt 0 ]]; then
+                [[ "$echoCompileCommands" == "enable" ]] && echo "clang++ $target ${obj_files[*]} -o \"$compilePath/app.exe\" $library_paths $libraries"
+                clang++ $target "${obj_files[@]}" -o "$compilePath/app.exe" $library_paths $libraries
+                if [[ "$scriptDebug" == "enable" ]]; then
+                    if [[ $? -eq 0 ]]; then
+                        echo "Link successful."
+                    else
+                        echo "Link failed."
+                        exit 1
+                    fi
                 fi
-            fi
-        else
-            if [[ "$scriptDebug" == "enable" ]]; then
-                echo "No object files generated."
+            else
+                [[ "$scriptDebug" == "enable" ]] && echo "No object files generated."
                 exit 1
             fi
         fi
     else
         # Compile directly to app.exe
-        if [[ "$echoCompileCommands" == "enable" ]]; then
-            echo "clang++ -std=c++$version ${cpp_files[*]} $include_flags -o \"$compilePath/app.exe\""
-        fi
-        clang++ -std=c++"$version" "${cpp_files[@]}" $include_flags -o "$compilePath/app.exe"
-        if [[ "$scriptDebug" == "enable" ]]; then
-            if [[ $? -eq 0 ]]; then
-                echo "Compilation successful."
-            else
-                echo "Compilation failed."
-                exit 1
-            fi
+        [[ "$echoCompileCommands" == "enable" ]] && echo "clang++ $target -std=c++$version $extra_flags ${cpp_files[*]} $include_flags -o \"$compilePath/app.exe\" $library_paths $libraries"
+        clang++ $target -std=c++"$version" $extra_flags "${cpp_files[@]}" $include_flags -o "$compilePath/app.exe" $library_paths $libraries
+        if [[ $? -ne 0 ]]; then
+            [[ "$scriptDebug" == "enable" ]] && echo "Compilation failed."
+            exit 1
+        elif [[ "$scriptDebug" == "enable" ]]; then
+            echo "Compilation successful."
         fi
     fi
 
@@ -205,19 +252,18 @@ if [[ ${#cpp_files[@]} -gt 0 ]]; then
         if [[ "$echoExecutionArguments" == "enable" ]]; then
             echo "Running $compilePath/app.exe with arguments: \"$*\""
         fi
-        "$compilePath/app.exe" "$@"
-        if [[ "$scriptDebug" == "enable" ]]; then
-            if [[ $? -ne 0 ]]; then
-                echo "Error: app.exe failed with exit code $?"
-            fi
+        pushd "$compilePath" >/dev/null
+        ./app.exe "$@"
+        exit_code=$?
+        popd >/dev/null
+        if [[ "$scriptDebug" == "enable" && $exit_code -ne 0 ]]; then
+            echo "Error: app.exe failed with exit code $exit_code"
         fi
     else
-        if [[ "$scriptDebug" == "enable" ]]; then
-            echo "Error: $compilePath/app.exe not found."
-        fi
+        [[ "$scriptDebug" == "enable" ]] && echo "Error: $compilePath/app.exe not found."
+        exit 1
     fi
 else
-    if [[ "$scriptDebug" == "enable" ]]; then
-        echo "No .cpp files found in src or lib directories."
-    fi
+    [[ "$scriptDebug" == "enable" ]] && echo "No .cpp files found in src or lib directories."
+    exit 1
 fi
