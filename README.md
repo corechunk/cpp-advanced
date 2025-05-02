@@ -69,16 +69,12 @@ Clone the repository to your local machine:
    ### 2. Run the Build Script:
    * Open a Command Prompt or PowerShell in the project directory.
    * Execute:
-```cmd
-build.bat
-```
+`build.bat`
    * The script compiles .cpp files from src and lib into app.exe in the specified compile path (default: binW)
    ### 3. Run the Program:
    * Navigate to the compile path (e.g., binW) and run:
     
-```cmd
-app.exe [arg1 arg2 ...]
-```
+`app.exe [arg1 arg2 ...]`
 * ## Linux/macOS
 
    ### 1. Configure Build Settings (Optional):
@@ -89,22 +85,16 @@ app.exe [arg1 arg2 ...]
    * Open a terminal in the project directory.
 
    * **Make the script executable:**
-```bash
-chmod +x build.sh
-```
+`chmod +x build.sh`
    * **Execute:**
-```bash
-./build.sh
-```
+`./build.sh`
 
    * **The script compiles .cpp files from src and lib into app in the specified compile path (default: binL).**
 
    ### 3. **Run the Program:**
 
    * Navigate to the compile path (e.g., binL) and run:
->>```bash
->>./app [arg1 arg2 ...]
->>```
+`./app [arg1 arg2 ...]`
 
 ---
 ---
