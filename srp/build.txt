@@ -7,11 +7,11 @@ createObjects:enable
 include_paths:
 library_paths:
 libraries:
-target_triple:
+target_triple:x86_64-w64-mingw32
 extra_flags:
 
 optionReading:disable
-echoOptions:enable
+echoOptions:disable
 
 echoCppFiles:disable
 echoObjectFiles:disable
