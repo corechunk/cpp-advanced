@@ -1,15 +1,15 @@
 Copy
 # C++ Multi-File Build System
 
-This repository, "cpp-advanced," provides a lightweight build system for multi-file C++ projects, using `build.bat` (Windows) and `build.sh` (Linux/macOS) to automate compilation and execution without relying on complex tools like CMake. Configurable via `srp/build.txt`, it supports `clang++` by default (extendable to `g++` or others) and compiles `.cpp` files from `src` and `lib` into a single executable (`app` or `app.exe`). The included C++ codebase serves as a generic example, making the project ideal for non-beginners who want a simple, customizable build process. The project is unfinished, so users should expect to troubleshoot and adapt based on their needs.
+This repository, "cpp-advanced," provides a lightweight build system for multi-file C++ projects, using `build.bat` (Windows) and `build.sh` (Linux/macOS) to automate compilation and execution without relying on complex tools like CMake. Configurable via `srp/build.txt`, it supports `clang++` by default (extendable to `g++` or others) and compiles `.cpp` files from `src` and `lib` into a single executable (`app` or `app.exe`). The included C++ codebase serves as a generic example, making the project ideal for non-beginners who want a simple, customizable build process.
 
 ## Table of Contents
 - [Features](#features)
 - [Why This Build System?](#why-this-build-system)
 - [Prerequisites](#prerequisites)
 - [Setting Up the Environment](#setting-up-the-environment)
-  - [For Windows](#for-windows)
-  - [For Linux (Ubuntu)](#for-linux-ubuntu)
+  - [Clang with Windows/Linux(Ubuntu)](#Clang-setup:)
+  - [Mingw with Windows/Linux(Ubuntu)](#Mingw-setup:)
 - [Getting Started](#getting-started)
   - [Windows](#windows)
   - [Linux/macOS](#linuxmacos)
