@@ -8,8 +8,8 @@ This repository, "cpp-advanced," provides a lightweight build system for multi-f
 - [Why This Build System?](#why-this-build-system)
 - [Prerequisites](#prerequisites)
 - [Setting Up the Environment](#setting-up-the-environment)
-  - [Clang with Windows/Linux(Ubuntu)](#clang-setup:)
-  - [Mingw with Windows/Linux(Ubuntu)](#mingw-setup:)
+  - [Clang with Windows/Linux(Ubuntu)](#clang-setup)
+  - [Mingw with Windows/Linux(Ubuntu)](#mingw-setup)
 - [Getting Started](#getting-started)
   - [Windows](#windows)
   - [Linux/macOS](#linuxmacos)
@@ -47,10 +47,10 @@ To use this build system, you need:
 
 ## Setting Up the Environment
 
-### Clang setup:
+## Clang setup
 * For Windows: [visit this page](srp/PAGE.md)
 * For Linux (Ubuntu): [visit this page](srp/PAGE2.md)
-### Mingw Setup
+## Mingw Setup
 * For Windows: [coming soon](srp/PAGE3.md)
 * For Linux (Ubuntu): [coming soon](srp/PAGE4.md)
 
