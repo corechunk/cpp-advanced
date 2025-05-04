@@ -45,7 +45,7 @@ To use this build system, you need:
 - A terminal or command prompt to run the build scripts.
 - 7zip (Windows) or `tar` (Linux/macOS) for extracting Clang archives.
 
-## Setting Up the Environment
+# Setting Up the Environment
 
 * ## Clang setup
   * For Windows: [visit this page](srp/PAGE.md)
@@ -54,7 +54,7 @@ To use this build system, you need:
   * For Windows: [coming soon](srp/PAGE3.md)
   * For Linux (Ubuntu): [coming soon](srp/PAGE4.md)
 
-## Getting Started
+# Getting Started
 
 ### Cloning the Repository
 Clone the repository to your local machine:
