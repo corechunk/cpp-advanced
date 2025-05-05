@@ -47,7 +47,7 @@ if exist "srp\build.txt" (
         :: evaluated 19 variables from build.txt except compilePathWindows
         if "!key!"=="compiler" set "compiler=!value!"
         if "!key!"=="version" set "version=!value!"
-        if "!key!"=="compilePathLinux" set "compilePath=!value!"
+        if "!key!"=="compilePathWindows" set "compilePath=!value!"
         if "!key!"=="exactPaths" set "exactPaths=!value!"
         if "!key!"=="createObjects" set "createObjects=!value!"
         if "!key!"=="optionReading" set "optionReading=!value!"
@@ -92,8 +92,6 @@ for %%v in (exactPaths createObjects optionReading echoOptions echoCppFiles echo
         ) else (
             set "%%v=disable"
         )
-        :: echoCompileCommands|scriptDebug|echoExecutionArguments) eval "$var=enable" ;;
-        :: *) eval "$var=disable" ;;
     )
 )
 if "!compiler!"=="" set "compiler=g++"
@@ -126,7 +124,7 @@ if "!echoOptions!"=="enable" (
     echo compiler: !compiler!
     echo version: !version!
     :: echo compilePathWindows: $compilePathWindows    ~not used in this script
-    echo compilePath: !compilePath!          # compilerPathLinux from 'build.txt' is used as compilerPath in this script
+    echo compilePath: !compilePath!          # compilerPathWindows from 'build.txt' is used as compilerPath in this script
     echo exactPaths: !exactPaths!
     echo createObjects: !createObjects!
     echo .
@@ -276,7 +274,7 @@ if not "!cpp_files!"=="" (
                     if "!echoCompileCommands!"=="enable" (
                         echo !compiler! !target! -std=c++!version! !extra_flags! -S "%%f" !include_flags! -o "!compilePath!\%%~nf.s"
                     )
-                    !compiler! !target! -std=c++!version! !extra_flags! -S "%%f" !include_flags! -o "!compilePath!\%%~nf.s"
+                    !compiler! !target! -std=c++!version! !extra_flags! -S as "%%f" !include_flags! -o "!compilePath!\%%~nf.s"
                 ) else (
                     if "!echoCompileCommands!"=="enable" (
                         echo !compiler! !target! -std=c++!version! !extra_flags! -c "%%f" !include_flags! -o "!compilePath!\%%~nf.o"
@@ -340,7 +338,12 @@ if not "!cpp_files!"=="" (
         if "!echoExecutionArguments!"=="enable" (
             echo Running !compilePath!\app.exe with arguments: "%*"
         )
-        pushd "!compilePath!"
+        pushd "!compilePath!" || (
+            if "!scriptDebug!"=="enable" (
+                echo Error: Failed to change to directory !compilePath!
+            )
+            exit /b 1
+        )
         app.exe %*
         set "exit_code=!errorlevel!"
         popd
