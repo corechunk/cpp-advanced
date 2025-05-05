@@ -341,7 +341,7 @@ if not "!cpp_files!"=="" (
             echo Running !compilePath!\app.exe with arguments: "%*"
         )
         pushd "!compilePath!"
-        .\app.exe %*
+        app.exe %*
         set "exit_code=!errorlevel!"
         popd
         if "!scriptDebug!"=="enable" if !exit_code! neq 0 (
