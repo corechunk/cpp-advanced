@@ -1,3 +1,4 @@
+compiler:g++
 version:17
 compilePathWindows:binW
 compilePathLinux:binL
