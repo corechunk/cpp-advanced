@@ -1,4 +1,3 @@
-cls
 @echo off
 setlocal EnableDelayedExpansion
 
@@ -123,7 +122,6 @@ if "!echoOptions!"=="enable" (
     echo .
     echo compiler: !compiler!
     echo version: !version!
-    :: echo compilePathWindows: $compilePathWindows    ~not used in this script
     echo compilePath: !compilePath!          # compilerPathWindows from 'build.txt' is used as compilerPath in this script
     echo exactPaths: !exactPaths!
     echo createObjects: !createObjects!
@@ -232,11 +230,13 @@ if not "!cpp_files!"=="" (
                 echo rel_path for %%f: !rel_path!
             )
             if "!exactPaths!"=="enable" (
-                mkdir "!compilePath!\!rel_path!" || (
-                    if "!scriptDebug!"=="enable" (
-                        echo Error: Failed to create directory !compilePath!\!rel_path!
+                if not exist "!compilePath!\!rel_path!" (
+                    mkdir "!compilePath!\!rel_path!" || (
+                        if "!scriptDebug!"=="enable" (
+                            echo Error: Failed to create directory !compilePath!\!rel_path!
+                        )
+                        exit /b 1
                     )
-                    exit /b 1
                 )
                 :: Three-way branch based on route
                 if "!route!"=="-E" (
@@ -274,7 +274,7 @@ if not "!cpp_files!"=="" (
                     if "!echoCompileCommands!"=="enable" (
                         echo !compiler! !target! -std=c++!version! !extra_flags! -S "%%f" !include_flags! -o "!compilePath!\%%~nf.s"
                     )
-                    !compiler! !target! -std=c++!version! !extra_flags! -S as "%%f" !include_flags! -o "!compilePath!\%%~nf.s"
+                    !compiler! !target! -std=c++!version! !extra_flags! -S "%%f" !include_flags! -o "!compilePath!\%%~nf.s"
                 ) else (
                     if "!echoCompileCommands!"=="enable" (
                         echo !compiler! !target! -std=c++!version! !extra_flags! -c "%%f" !include_flags! -o "!compilePath!\%%~nf.o"
