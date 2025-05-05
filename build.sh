@@ -195,7 +195,7 @@ cpp_files=()
 while IFS= read -r file; do
     file_path="${file#$(pwd)/}"
     cpp_files+=("$file_path")
-done < <(find src lib -type f -name "*.cpp" 2>/dev/null)
+done < <(find . -type f -name "*.cpp" 2>/dev/null)
 # Echo cpp_files
 if [[ "$echoCppFiles" == "enable" ]]; then
     echo "cpp_files: ${cpp_files[*]}"
