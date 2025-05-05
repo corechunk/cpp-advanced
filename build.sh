@@ -181,6 +181,24 @@ done < <(find . -type f -not -name "*.*" 2>/dev/null)
 for file in "${linuxExecutable_files[@]}"; do
     rm -f "$file" 2>/dev/null
 done
+# delete all assembly files
+assembly_files=()
+while IFS= read -r file; do
+    file_path="${file#$(pwd)/}"
+    assembly_files+=("$file_path")
+done < <(find . -type f -not -name "*.s" 2>/dev/null)
+for file in "${assembly_files[@]}"; do
+    rm -f "$file" 2>/dev/null
+done
+# delete all resolvedCPP files
+resolvedCPP_files=()
+while IFS= read -r file; do
+    file_path="${file#$(pwd)/}"
+    resolvedCPP_files+=("$file_path")
+done < <(find . -type f -not -name "*.resolved.cpp" 2>/dev/null)
+for file in "${resolvedCPP_files[@]}"; do
+    rm -f "$file" 2>/dev/null
+done
 
 # Step 1: Create compilePath if it doesn't exist
 if [[ ! -d "$compilePath" ]]; then
