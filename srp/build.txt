@@ -8,7 +8,7 @@ createObjects:enable
 include_paths:
 library_paths:
 libraries:
-target_triple:x86_64-w64-mingw32
+target_triple:
 extra_flags:
 
 optionReading:disable
