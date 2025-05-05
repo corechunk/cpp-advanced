@@ -58,19 +58,19 @@ if [[ -z "$compilePath" ]]; then
 fi
 
     # Step 4: Run app.exe with all arguments
-    if [[ -f "$compilePath/app.exe" ]]; then
+    if [[ -f "$compilePath/app" ]]; then
         if [[ "$echoExecutionArguments" == "enable" ]]; then
-            echo "Running $compilePath/app.exe with arguments: \"$*\""
+            echo "Running $compilePath/app with arguments: \"$*\""
         fi
         [[ "$echoCompileCommands" == "enable" ]] && echo "./app.exe"
         pushd "$compilePath" >/dev/null
-        ./app.exe "$@"
+        ./app "$@"
         exit_code=$?
         popd >/dev/null
         if [[ "$scriptDebug" == "enable" && $exit_code -ne 0 ]]; then
-            echo "Error: app.exe failed with exit code $exit_code"
+            echo "Error: app failed with exit code $exit_code"
         fi
     else
-        [[ "$scriptDebug" == "enable" ]] && echo "Error: $compilePath/app.exe not found."
+        [[ "$scriptDebug" == "enable" ]] && echo "Error: $compilePath/app not found."
         exit 1
     fi
