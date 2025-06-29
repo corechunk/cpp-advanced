@@ -1,4 +1,4 @@
-#### Return [Previous Page](README.md)
+#### Return [Previous Page](../README.md)
 ---
 
 # 1. Download Clang Compiler
