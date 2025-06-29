@@ -7,9 +7,7 @@ This repository, "cpp-advanced," provides a lightweight build system for multi-f
 - [Features](#features)
 - [Why This Build System?](#why-this-build-system)
 - [Prerequisites](#prerequisites)
-- [Setting Up the Environment](#setting-up-the-environment)
-  - [Clang setup with Windows/Linux(Ubuntu)](#clang-setup)
-  - [Mingw setup (coming soon)](#mingw-setup)
+- [Requirements](#requirements)
 - [Getting Started](#getting-started)
   - [Windows](#windows)
   - [Linux/macOS](#linuxmacos)
@@ -45,14 +43,12 @@ To use this build system, you need:
 - A terminal or command prompt to run the build scripts.
 - 7zip (Windows) or `tar` (Linux/macOS) for extracting Clang archives.
 
-# Setting Up the Environment
+## Requirements
 
-* ## Clang setup
-  * For Windows: [visit this page](https://github.com/Miraj13123/extras/blob/main/files/clangWindows.md)
-  * For Linux (Ubuntu): [visit this page](https://github.com/Miraj13123/extras/blob/main/files/clangLinux.md)
-* ## Mingw Setup
-  * For Windows: [coming soon]([srp/PAGE3.md](https://github.com/Miraj13123/extras/blob/main/files/mingwWindows.md))
-  * For Linux (Ubuntu): [coming soon]([srp/PAGE4.md](https://github.com/Miraj13123/extras/blob/main/files/clangLinux.md))
+- A **C++ compiler** must be installed and available in your PATH:
+  - For C++ Compilers: [Visit This Link](https://github.com/Miraj13123/extras/blob/main/c_cpp_compilers.md)
+
+---
 
 # Getting Started
 
