@@ -1,4 +1,4 @@
-#### Return [Previous Page](README.md)
+#### Return [Previous Page](../README.md)
 ---
 
 # Shortcut for Step [ 1 to 5 ] to download clang and add it to environment variable path
