@@ -7,7 +7,6 @@ This repository, "cpp-advanced," provides a lightweight build system for multi-f
 - [Features](#features)
 - [Why This Build System?](#why-this-build-system)
 - [Prerequisites](#prerequisites)
-- [Requirements](#requirements)
 - [Getting Started](#getting-started)
   - [Windows](#windows)
   - [Linux/macOS](#linuxmacos)
@@ -36,17 +35,11 @@ Compiling multi-file C++ projects often requires complex tools like CMake, which
 
 ## Prerequisites
 To use this build system, you need:
-- A C++ compiler (preferably `clang++`, but `g++` or MSVC can be used with script modifications):
-  - **Windows**: Clang or MinGW (`g++`)
-  - **Linux/macOS**: Clang or `g++`
-- Git to clone the repository.
-- A terminal or command prompt to run the build scripts.
-- 7zip (Windows) or `tar` (Linux/macOS) for extracting Clang archives.
-
-## Requirements
-
 - A **C++ compiler** must be installed and available in your PATH:
   - For C++ Compilers: [Visit This Link](https://github.com/Miraj13123/extras/blob/main/c_cpp_compilers.md)
+- Git to clone the repository.
+- A terminal or command prompt to run the build scripts.
+
 
 ---
 
