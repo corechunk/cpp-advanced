@@ -36,7 +36,7 @@ Compiling multi-file C++ projects often requires complex tools like CMake, which
 ## Requirements
 To use this build system, you need:
 - A **C++ compiler** must be installed and available in your PATH:
-  - For C++ Compilers: [Visit This Link](https://github.com/corechunk/extras/blob/main/filescompilers/c_cpp_compilers.md)
+  - For C++ Compilers: [Visit This Link](https://github.com/corechunk/extras/blob/main/files/compilers/c_cpp/c_cpp_compilers.md)
 - Git to clone the repository.
 - A terminal or command prompt to run the build scripts.
 
