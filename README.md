@@ -48,7 +48,7 @@ To use this build system, you need:
 ### Cloning the Repository
 Clone the repository to your local machine:
 >>```bash
->>git clone https://github.com/Miraj13123/cpp-advanced.git
+>>git clone https://github.com/corechunk/cpp-advanced.git
 >>cd cpp-advanced
 >>```
 * ## Windows
